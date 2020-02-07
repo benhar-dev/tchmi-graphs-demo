@@ -18,7 +18,7 @@ in perpetuity.
 ## Install 
 
 ## TwinCAT
-This project uses TcXaeShell 3.1.4024.0
+This project uses TcXaeShell 3.1.4024.0 and TwinCAT HMI 1.10.1336.340
 
 ## Getting started
 This is not a guide for TcXaeShell, please visit http://beckhoff.com/ for further guides
