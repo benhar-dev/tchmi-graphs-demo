@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <GVL Name="GVL" Id="{3907cfb6-42a5-4b11-b5ab-66dbbbe0714a}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+
+	MAX_POINTS : INT := 600;	
+
+END_VAR
+VAR_GLOBAL
+
+	programState : E_ProgramState := E_ProgramState.INIT;
+	dataPoints : ARRAY[1..2, 0..MAX_POINTS] OF ST_DataPoint;
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

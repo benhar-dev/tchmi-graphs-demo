@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="E_ProgramState" Id="{75ce36ce-63fb-42dc-8544-0e422db8040f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_ProgramState :
+(
+	INIT,
+	REFRESH_SETPOINTS_USING_FORMULA,
+	WAIT_FOR_START_COMMAND,
+	ACTIVE,
+	COMPLETE,
+	RESET	
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

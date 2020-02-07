@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="MAIN" Id="{0703165b-bf3e-4d9c-ae1f-4e0290c1746d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	
+	i : INT; 
+	
+	// used to create the bell curve
+	a : LREAL := 200;
+	b : LREAL := 4;
+	c : LREAL := 300;
+	
+	yScale : LREAL := 700;
+	
+	delayTimer : ton;
+	activePoint : INT;
+	tempSetpoint : INT;
+	randomNumberGenerator : DRAND;
+	randomNumber : LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE GVL.programState OF
+	
+	E_ProgramState.INIT:
+	
+		// quick method of cleaning an array
+		memset(ADR(GVL.dataPoints),16#0,SIZEOF(GVL.dataPoints));
+		activePoint := 0;
+		
+		// move to next state
+		GVL.programState := E_ProgramState.REFRESH_SETPOINTS_USING_FORMULA;
+	
+	E_ProgramState.REFRESH_SETPOINTS_USING_FORMULA:
+		
+		// setup a bell curve in the setpoint datapoint array
+		FOR i := 0 TO GVL.MAX_POINTS DO
+			
+			GVL.dataPoints[E_DataSet.SETPOINTS,i].x := i;
+			GVL.dataPoints[E_DataSet.SETPOINTS,i].y := LREAL_TO_INT((1 / (1 + (EXPT(((GVL.dataPoints[E_DataSet.SETPOINTS,i].x-c)/a),(2 * b))))) * yScale);
+		
+		END_FOR
+		
+		// move to next state
+		GVL.programState := E_ProgramState.WAIT_FOR_START_COMMAND;
+	
+	E_ProgramState.WAIT_FOR_START_COMMAND:
+	
+		// the hmi will trigger the program state to change to active when the start button is pressed.
+	
+	E_ProgramState.ACTIVE:
+	
+		delayTimer(pt:=T#100MS, in:=NOT delayTimer.Q);
+		
+
+		IF delayTimer.Q THEN
+			IF activePoint <= GVL.MAX_POINTS THEN 
+				activePoint := activePoint + 1;
+				
+				// read an actual value an place in the array.
+				// for this example the actual value is the setpoint + some random noise
+				
+				tempSetpoint := GVL.dataPoints[E_DataSet.SETPOINTS,activePoint].y;
+				randomNumber := randomNumberGenerator.Num;
+				tempSetpoint := tempSetpoint - LREAL_TO_INT((randomNumber*20)-10);
+				
+				GVL.dataPoints[E_DataSet.ACTUAL,activePoint].x := activePoint;
+				GVL.dataPoints[E_DataSet.ACTUAL,activePoint].y := tempSetpoint;
+				
+				FOR i := activePoint TO GVL.MAX_POINTS DO
+					GVL.dataPoints[E_DataSet.ACTUAL,i].x := activePoint;
+					GVL.dataPoints[E_DataSet.ACTUAL,i].y := tempSetpoint;
+				END_FOR
+				
+				
+			ELSE
+				GVL.programState := E_ProgramState.COMPLETE;
+			END_IF
+			
+		END_IF
+	
+	E_ProgramState.COMPLETE:
+	
+	E_ProgramState.RESET:
+	
+		// user selects reset so re-init
+		GVL.programState := E_ProgramState.INIT;
+	
+END_CASE
+
+randomNumberGenerator(seed:=0);]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="129" Count="30" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="160" Count="8" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="194" Count="5" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="169" Count="16" />
+      <LineId Id="87" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
